@@ -6,6 +6,7 @@ export const errorHander = (method: Function) =>{
         try {
             await method(req, res, next)
         } catch (error: any) {
+            console.log(error);
             let exception: HttpException;
             if(error instanceof HttpException){
                 exception = error;
