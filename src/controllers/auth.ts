@@ -44,12 +44,15 @@ export const signin = async (req:Request, res:Response, next: NextFunction) =>{
         }else{
             const token = jwt.sign({
                 userId: user.id, 
-                
             },JWT_SECRET)
     
             res.status(200).json({
                 user,
                 token
-            })
+            }) 
         }
+}
+
+export const me = async (req: Request, res: Response) =>{
+    res.json(req.user)
 }

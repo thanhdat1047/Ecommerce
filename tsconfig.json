@@ -1,4 +1,5 @@
 {
+   
     "compilerOptions": {
         "module": "NodeNext",
         "moduleResolution": "node",
@@ -6,6 +7,17 @@
         "outDir":"dist",
         "sourceMap": true,
         "noImplicitAny": true,
+        "typeRoots": [
+            "./src/@types",
+            "./custom_typings",
+            "./@types",
+            "./node_modules/@types"
+        ]
+
     },
     "include": ["src/**/*"],
+    //"exclude": ["node_modules/"],
+    //"files": ["express.d.ts"]
+
+    
 }
