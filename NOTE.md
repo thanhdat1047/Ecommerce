@@ -11,4 +11,6 @@ npm i @types/bcrypt --save-dev
 npm install jsonwebtoken
 npm install @types/jsonwebtoken --save-dev
 npm i zod
+npm install body-parser
+npm install @types/body-parser --save-dev
 
