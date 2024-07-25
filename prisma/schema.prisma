@@ -18,6 +18,14 @@ enum Role {
   USER
 }
 
+enum OrderEventStatus {
+  PENDING
+  ACCEPTED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
 model User {
   id Int @id @default(autoincrement())
   name String
@@ -30,12 +38,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  cartItem CartItem[]
   address Address[]
+  order Order[]
   @@map("users")
 }
-
-
-
 
 model Product {
   id Int @id @default(autoincrement())
@@ -45,7 +52,9 @@ model Product {
   tags String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-   
+  
+  cartItem CartItem[]
+  orderProduct OrderProduct[]
   @@map("products")
 }
 model Address {
@@ -61,4 +70,54 @@ model Address {
   updatedAt DateTime @updatedAt
 
   @@map("address")
+}
+
+model CartItem {
+  id Int @id @default(autoincrement())  
+  quantity Int
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  productId Int
+  product Product @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("cart_item")
+}
+
+model Order{
+  id Int @id @default(autoincrement())  
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  netAmount Decimal
+  address String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orderProduct OrderProduct[]
+  event OrderEvent[]
+  @@map("order")
+}
+
+model OrderProduct {
+  id Int @id @default(autoincrement())
+  orderId Int
+  order Order @relation(fields: [orderId], references: [id])
+  productId Int
+  product Product @relation(fields: [productId], references: [id])
+  quantity Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("order_products")
+}
+
+model OrderEvent {
+  id Int @id @default(autoincrement())
+  orderId Int
+  order Order @relation(fields: [orderId], references: [id])
+  status OrderEventStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("event")
 }
