@@ -8,9 +8,11 @@ export const errorHander = (method: Function) =>{
         try {
             await method(req, res, next)
         } catch (error: any) {
-            console.log(error);
+            console.log('Error handler',error);
             let exception: HttpException;
             if(error instanceof HttpException){
+                console.log("HttpException");
+                
                 exception = error;
             }else{
                 if( error instanceof ZodError){
