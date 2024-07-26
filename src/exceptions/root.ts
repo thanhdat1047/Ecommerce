@@ -32,4 +32,5 @@ export enum ErrorCodes {
     PRODUCT_REALDY_EXISTS = 5002,
     ORDER_NOT_FOUND = 6001,
     CART_ITEM_NOT_FOUND = 7001, 
+    ROLE_NOT_FOUND =8001
 }

@@ -5,7 +5,12 @@ import { ErrorCodes } from "../exceptions/root";
 import { Address, User } from "@prisma/client";
 import { prismaClient } from "../index";
 import { BadRequestsException } from "../exceptions/bad-request";
-
+import { UpdateRole } from "../schema/address";
+import { isValueInEnum } from "../helper/checkEnum";
+enum Role {
+    ADMIN,
+    USER
+}
 export const addAddress = async (req: Request, res:Response)=>{
     CreateAddressSchema.parse(req.body)
     const address = await prismaClient.address.create({
@@ -16,6 +21,7 @@ export const addAddress = async (req: Request, res:Response)=>{
     })
     res.json(address)
 }
+
 export const deleteAddress = async(req: Request, res:Response)=>{
     try {
         await prismaClient.address.delete({
@@ -77,4 +83,50 @@ export const updateUser = async (req:Request, res: Response, next: NextFunction)
         data:validatedDate
     })
     res.json(updateUser);
+}
+
+export const listUsers = async(req: Request, res: Response)=>{
+    const users = await prismaClient.user.findMany({
+        skip: +req.query.skip ||0,
+        take: +req.query.take ||5,
+    })
+    res.json(users)
+}
+export const getUserById = async(req: Request, res: Response, next: NextFunction)=>{
+    try {
+        const user = await prismaClient.user.findFirstOrThrow({
+            where:{
+                id: +req.params.id
+            },
+            include:{
+                address: true
+            }
+        })
+        
+        res.json(user)
+    } catch (error) {
+        next( new NotFoundException('User not found', ErrorCodes.USER_NOT_FOUND))
+    }
+}
+export const changeUserRole = async(req: Request, res: Response, next: NextFunction)=>{
+    //Validation , define AddressSchema
+   
+    const validatedDate = UpdateRole.parse(req.body);
+    if(!isValueInEnum(validatedDate.role, Role)){
+        return next(new BadRequestsException('Role is not found', ErrorCodes.ROLE_NOT_FOUND))
+    }
+    try {
+        const user = await prismaClient.user.update({
+            where:{
+                id: +req.params.id
+            },
+            data:{
+                role: req.body.role
+            }
+        })
+        
+        res.json(user)
+    } catch (error) {
+        next( new NotFoundException('User not found', ErrorCodes.USER_NOT_FOUND))
+    }
 }
