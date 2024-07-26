@@ -10,6 +10,8 @@ productsRoutes.post('/', [authMiddleware, adminMiddleware],errorHander(createPro
 productsRoutes.put('/:id', [authMiddleware, adminMiddleware],errorHander(updateProduct));
 productsRoutes.delete('/:id', [authMiddleware, adminMiddleware],errorHander(deleteProduct));
 productsRoutes.get('/', [authMiddleware, adminMiddleware],errorHander(listProducts));
+//productsRoutes.get('/products/search', [authMiddleware, adminMiddleware],errorHander(searchProducts));
 productsRoutes.get('/:id', [authMiddleware, adminMiddleware],errorHander(getProductById));
 
+// /search?q=""
 export default productsRoutes;

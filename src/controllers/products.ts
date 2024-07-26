@@ -74,3 +74,20 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
     }
 
 }
+
+// export const searchProducts = async (req: Request, res:Response, next: NextFunction) =>{
+//     const products = await prismaClient.product.findMany({
+//         where:{
+//             name:{
+//                 search: req.query.q.toString()
+//             },
+//             description:{
+//                 search: req.query.q.toString()
+//             },
+//             tags:{
+//                 search: req.query.q.toString()
+//             },
+//         }
+//     })
+//     res.json(products)
+// }
