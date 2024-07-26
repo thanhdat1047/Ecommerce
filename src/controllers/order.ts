@@ -4,6 +4,8 @@ import { ErrorCodes } from "../exceptions/root";
 import { NextFunction, Request, Response } from "express";
 import { prismaClient } from "../index";
 import { ChangeQuantitySchema, CreateCartItemSchema } from "../schema/cart";
+import { BadRequestsException } from "../exceptions/bad-request";
+import { UnauthorizedException } from "../exceptions/unathorized";
 
 export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
     //1. to create a transaction
@@ -39,6 +41,7 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
                 userId: req.user.id as number,
                 netAmount: price as number,
                 address: address.formattedAddress,
+                status: "PENDING",
                 orderProduct: {
                     create: cartItems.map((cart) => {
                         return {
@@ -67,11 +70,64 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
     })
 }
 export const listOrders = async (req: Request, res: Response, next: NextFunction) => {
-
+    const orders  = await prismaClient.order.findMany({
+        where:{
+            userId: req.user.id
+        },
+    })
+    res.json(orders)
 }
 export const cancelOrder = async (req: Request, res: Response, next: NextFunction) => {
-
+    // 1. wrap it insiden tranaction
+    // 2. check if the users is cancelling its own order
+    return await prismaClient.$transaction(async (tx) => {
+        try {
+            const order = await tx.order.findFirstOrThrow({
+                where:{
+                    id: +req.params.id
+                }
+            })
+            if(order.userId != req.user.id){
+                next(new UnauthorizedException('Unauthorized', ErrorCodes.UNAUTHORIZED,null))
+            }
+            const newoder = await tx.order.update({
+                where:{
+                    id: +req.params.id
+                },
+                data:{
+                    status: "CANCELLED"
+                }
+            })
+            
+            await tx.orderEvent.updateMany({
+                where:{
+                    orderId: +newoder.id
+                },
+                data:{
+                    orderId: order.id,
+                    status: "CANCELLED"
+                }
+            })
+            return res.json(newoder)
+        } catch (error) {
+            next(new NotFoundException('Order not found', ErrorCodes.ORDER_NOT_FOUND))
+        }
+    })
+    
 }
 export const getOrderById = async (req: Request, res: Response, next: NextFunction) => {
-
+    try {
+        const order = await prismaClient.order.findFirstOrThrow({
+            where: {
+                id: +req.params.id
+            },
+            include:{
+                orderProduct: true,
+                event:true,
+            }
+        })
+        res.json(order)
+    } catch (error) {
+        next(new NotFoundException('Order not found', ErrorCodes.ORDER_NOT_FOUND))
+    }
 }
